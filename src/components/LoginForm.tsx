@@ -48,9 +48,9 @@ const LoginForm: React.FC = () => {
   return (
     <Card className="w-full max-w-md mx-auto overflow-hidden backdrop-blur-sm bg-white/95 shadow-xl">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">CEMIG Account</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-astro-green">Astro Energy Account</CardTitle>
         <CardDescription className="text-center">
-          Entre com suas credenciais da CEMIG
+          Entre com suas credenciais da Astro Energy
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -78,7 +78,7 @@ const LoginForm: React.FC = () => {
           </div>
           <Button 
             type="submit" 
-            className="w-full"
+            className="w-full bg-astro-green hover:bg-astro-green/90"
             disabled={isLoading}
           >
             {isLoading ? <ClipLoader size={18} color="#ffffff" /> : "Entrar"}
@@ -87,7 +87,7 @@ const LoginForm: React.FC = () => {
       </CardContent>
       <CardFooter>
         <p className="text-center text-sm text-muted-foreground w-full">
-          Acesse o histórico de suas contas CEMIG
+          Acesse o histórico de suas contas Astro Energy
         </p>
       </CardFooter>
     </Card>

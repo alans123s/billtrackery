@@ -14,10 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 215 100% 50%; /* CEMIG blue */
+    --primary: 150 100% 25%; /* Astro Energy green */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 30 100% 50%; /* Astro Energy orange */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -31,7 +31,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 215 100% 50%; /* CEMIG blue */
+    --ring: 150 100% 25%; /* Astro Energy green */
 
     --radius: 0.5rem;
 
@@ -55,10 +55,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 215 100% 50%; /* CEMIG blue */
+    --primary: 150 100% 25%; /* Astro Energy green */
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 30 100% 50%; /* Astro Energy orange */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -72,7 +72,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 215 100% 50%; /* CEMIG blue */
+    --ring: 150 100% 25%; /* Astro Energy green */
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -104,11 +104,27 @@
   transform: translateY(-2px);
 }
 
-/* CEMIG branded styles */
-.bg-cemig-blue {
-  background-color: #0066cc;
+/* Astro Energy branded styles */
+.bg-astro-green {
+  background-color: #008343;
 }
 
-.text-cemig-blue {
-  color: #0066cc;
+.text-astro-green {
+  color: #008343;
+}
+
+.bg-astro-orange {
+  background-color: #FF9939;
+}
+
+.text-astro-orange {
+  color: #FF9939;
+}
+
+.bg-astro-yellow {
+  background-color: #FFD700;
+}
+
+.text-astro-yellow {
+  color: #FFD700;
 }

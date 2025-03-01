@@ -35,7 +35,7 @@ const Index = () => {
           {!auth.isAuthenticated ? (
             <div className="space-y-8 my-8 p-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg">
               <div className="text-center space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">CEMIG Account Manager</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-astro-green">Astro Energy Manager</h1>
                 <p className="text-muted-foreground">
                   Acesse suas contas de energia e histórico de consumo
                 </p>
@@ -56,7 +56,7 @@ const Index = () => {
       
       <footer className="py-6 border-t bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} CEMIG Account Manager - Não oficial</p>
+          <p>© {new Date().getFullYear()} Astro Energy Manager - Não oficial</p>
         </div>
       </footer>
     </div>
