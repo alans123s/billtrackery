@@ -20,13 +20,20 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div 
+      className="min-h-screen flex flex-col bg-no-repeat bg-cover bg-fixed" 
+      style={{ 
+        backgroundImage: 'url("/lovable-uploads/93c36e4e-6dab-49d1-8b21-b66ae63c1386.png")',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundBlendMode: 'overlay',
+      }}
+    >
       <Header />
       
       <main className="flex-1 container mx-auto px-4 py-8 md:px-6">
         <div className="max-w-4xl mx-auto">
           {!auth.isAuthenticated ? (
-            <div className="space-y-8 my-8">
+            <div className="space-y-8 my-8 p-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg">
               <div className="text-center space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">CEMIG Account Manager</h1>
                 <p className="text-muted-foreground">
@@ -36,13 +43,13 @@ const Index = () => {
               <LoginForm />
             </div>
           ) : (
-            <>
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6">
               {selectedSite ? (
                 <BillsHistory site={selectedSite} onBack={handleBack} />
               ) : (
                 <SitesList onSelectSite={handleSelectSite} />
               )}
-            </>
+            </div>
           )}
         </div>
       </main>
