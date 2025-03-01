@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { ClipLoader } from 'react-spinners';
 import { motion } from 'framer-motion';
-import { Keyhole, Key } from 'lucide-react';
+import { LockKeyhole, Key } from 'lucide-react';
 
 const LoginForm: React.FC = () => {
   const [document, setDocument] = useState('');
@@ -115,7 +115,7 @@ const LoginForm: React.FC = () => {
               whileHover={{ scale: 1.01 }}
             >
               <Label htmlFor="document" className="flex items-center gap-1">
-                <Keyhole className={`h-4 w-4 ${focusedField === 'document' ? 'text-astro-green' : 'text-gray-500'}`} />
+                <LockKeyhole className={`h-4 w-4 ${focusedField === 'document' ? 'text-astro-green' : 'text-gray-500'}`} />
                 CPF/CNPJ
               </Label>
               <Input
