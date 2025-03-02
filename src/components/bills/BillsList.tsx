@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ClipLoader } from 'react-spinners';
 import { AlertCircle, ReceiptIcon } from 'lucide-react';
 import BillCard from './BillCard';
+import { motion } from 'framer-motion';
 
 interface BillsListProps {
   bills: Bill[];
@@ -43,8 +44,15 @@ const BillsList: React.FC<BillsListProps> = ({ bills, isLoading, error }) => {
 
   return (
     <div className="space-y-4">
-      {bills.map((bill) => (
-        <BillCard key={bill.billIdentifier} bill={bill} />
+      {bills.map((bill, index) => (
+        <motion.div
+          key={bill.billIdentifier}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.05 }}
+        >
+          <BillCard bill={bill} />
+        </motion.div>
       ))}
     </div>
   );

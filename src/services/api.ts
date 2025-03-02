@@ -1,10 +1,11 @@
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { LoginResponse, Site, Bill } from '@/types';
 
 const API_URL = "https://www.atendimento.cemig.com.br/graphql";
 const API_KEY = "fcad2ef3-49b7-4ac8-bcdb-d78c0fa6e0b6";
 
-// Create axios instance
+// Create axios instance with default configuration
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -14,8 +15,60 @@ const api = axios.create({
   }
 });
 
+// Helper function to handle API errors
+const handleApiError = (error: unknown): never => {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError;
+    console.error('API Error:', {
+      status: axiosError.response?.status,
+      data: axiosError.response?.data,
+      message: axiosError.message
+    });
+    
+    // Improve error messages based on status code
+    if (axiosError.response?.status === 401) {
+      throw new Error('Credenciais inválidas ou sessão expirada');
+    } else if (axiosError.response?.status === 403) {
+      throw new Error('Acesso não autorizado');
+    } else if (axiosError.response?.status === 429) {
+      throw new Error('Muitas requisições. Tente novamente em alguns minutos');
+    } else if (axiosError.response?.status >= 500) {
+      throw new Error('Erro no servidor. Tente novamente mais tarde');
+    }
+  }
+  
+  console.error('Unknown error:', error);
+  throw new Error('Ocorreu um erro inesperado. Tente novamente');
+};
+
+// Type for authentication headers
+interface AuthHeaders {
+  headers: {
+    'authorization': string;
+    'p-id': string;
+    'protocol': string;
+    'protocol-id': string;
+    'protocol-type': string;
+    'channel'?: string;
+  }
+}
+
+// Create authentication headers helper
+const createAuthHeaders = (authToken: string, protocol: string, protocolId: string, pId: string): AuthHeaders => {
+  return {
+    headers: {
+      'authorization': `Bearer ${authToken}`,
+      'p-id': pId,
+      'protocol': protocol,
+      'protocol-id': protocolId,
+      'protocol-type': 'PF',
+      'channel': 'App',
+    }
+  };
+};
+
 // Login function
-export const login = async (document: string, password: string) => {
+export const login = async (document: string, password: string): Promise<LoginResponse> => {
   try {
     const response = await api.post('', {
       operationName: "Login",
@@ -60,16 +113,21 @@ export const login = async (document: string, password: string) => {
       }`
     });
     
+    if (!response.data.data?.login) {
+      throw new Error('Resposta da API inválida');
+    }
+    
     return response.data.data.login;
   } catch (error) {
-    console.error('Login error:', error);
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // Get sites list
-export const getSitesList = async (authToken: string, protocol: string, protocolId: string, pId: string) => {
+export const getSitesList = async (authToken: string, protocol: string, protocolId: string, pId: string): Promise<Site[]> => {
   try {
+    const authHeaders = createAuthHeaders(authToken, protocol, protocolId, pId);
+    
     const response = await api.post('', {
       operationName: "SiteListByBusinessPartnerV2",
       variables: {
@@ -89,26 +147,23 @@ export const getSitesList = async (authToken: string, protocol: string, protocol
           }
         }
       }`
-    }, {
-      headers: {
-        'authorization': `Bearer ${authToken}`,
-        'p-id': pId,
-        'protocol': protocol,
-        'protocol-id': protocolId,
-        'protocol-type': 'PF',
-      }
-    });
+    }, authHeaders);
+    
+    if (!response.data.data?.siteListByBusinessPartnerV2?.sites) {
+      throw new Error('Resposta da API inválida');
+    }
     
     return response.data.data.siteListByBusinessPartnerV2.sites;
   } catch (error) {
-    console.error('Get sites error:', error);
-    throw error;
+    return handleApiError(error);
   }
 };
 
 // Get bills history
-export const getBillsHistory = async (authToken: string, protocol: string, protocolId: string, pId: string, siteId: string) => {
+export const getBillsHistory = async (authToken: string, protocol: string, protocolId: string, pId: string, siteId: string): Promise<Bill[]> => {
   try {
+    const authHeaders = createAuthHeaders(authToken, protocol, protocolId, pId);
+    
     const response = await api.post('', {
       operationName: "BillsHistory",
       variables: {
@@ -132,20 +187,14 @@ export const getBillsHistory = async (authToken: string, protocol: string, proto
           }
         }
       }`
-    }, {
-      headers: {
-        'authorization': `Bearer ${authToken}`,
-        'p-id': pId,
-        'protocol': protocol,
-        'protocol-id': protocolId,
-        'protocol-type': 'PF',
-        'channel': 'App',
-      }
-    });
+    }, authHeaders);
+    
+    if (!response.data.data?.billsHistory?.bills) {
+      throw new Error('Resposta da API inválida');
+    }
     
     return response.data.data.billsHistory.bills;
   } catch (error) {
-    console.error('Get bills history error:', error);
-    throw error;
+    return handleApiError(error);
   }
 };
