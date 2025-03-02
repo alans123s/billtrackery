@@ -1,17 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getBillsHistory } from '../services/api';
+import { getBillsHistory, getSitesList } from '../services/api';
 import { Bill, Site } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ClipLoader } from 'react-spinners';
 import { useToast } from '@/hooks/use-toast';
-import { Download, ArrowLeft, AlertCircle, ReceiptIcon } from 'lucide-react';
+import { Download, ArrowLeft, AlertCircle, ReceiptIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDistanceToNow, format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import * as XLSX from 'xlsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BillsHistoryProps {
   site: Site;
@@ -22,10 +23,14 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
+  const [loadingSites, setLoadingSites] = useState(false);
+  const [selectedSiteId, setSelectedSiteId] = useState<string>(site.id);
   
   const { auth } = useAuth();
   const { toast } = useToast();
 
+  // Fetch bills for the selected site
   useEffect(() => {
     const fetchBills = async () => {
       if (!auth.accessToken || !auth.protocol || !auth.protocolId || !auth.pId) {
@@ -34,13 +39,14 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
         return;
       }
 
+      setIsLoading(true);
       try {
         const billsData = await getBillsHistory(
           auth.accessToken,
           auth.protocol,
           auth.protocolId,
           auth.pId,
-          site.id
+          selectedSiteId
         );
         setBills(billsData);
       } catch (error) {
@@ -57,7 +63,45 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     };
 
     fetchBills();
-  }, [site, auth, toast]);
+  }, [selectedSiteId, auth, toast]);
+
+  // Fetch all sites for site selector
+  useEffect(() => {
+    const fetchSites = async () => {
+      if (!auth.accessToken || !auth.protocol || !auth.protocolId || !auth.pId) {
+        return;
+      }
+
+      setLoadingSites(true);
+      try {
+        const sitesData = await getSitesList(
+          auth.accessToken,
+          auth.protocol,
+          auth.protocolId,
+          auth.pId
+        );
+        // Only include active sites
+        const activeSites = sitesData.filter(site => site.status === 'Active');
+        setSites(activeSites);
+      } catch (error) {
+        console.error('Error fetching sites:', error);
+      } finally {
+        setLoadingSites(false);
+      }
+    };
+
+    fetchSites();
+  }, [auth]);
+
+  const handleSiteChange = (siteId: string) => {
+    setSelectedSiteId(siteId);
+    // Find the selected site to update page title
+    const selectedSite = sites.find(s => s.id === siteId);
+    if (selectedSite) {
+      // We don't update the parent component's selected site because
+      // we're handling the site selection within this component
+    }
+  };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -114,7 +158,9 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     
     worksheet['!cols'] = colWidths;
     
-    XLSX.writeFile(workbook, `historico_contas_${site.siteNumber}.xlsx`);
+    // Use the current selected site for the filename
+    const currentSite = sites.find(s => s.id === selectedSiteId) || site;
+    XLSX.writeFile(workbook, `historico_contas_${currentSite.siteNumber}.xlsx`);
     
     toast({
       title: "Download concluído",
@@ -122,7 +168,10 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     });
   };
 
-  if (isLoading) {
+  // Get current site info
+  const currentSite = sites.find(s => s.id === selectedSiteId) || site;
+
+  if (isLoading && sites.length === 0) {
     return (
       <div className="flex justify-center items-center py-10">
         <ClipLoader size={40} color="#000000" />
@@ -130,7 +179,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     );
   }
 
-  if (error) {
+  if (error && sites.length === 0) {
     return (
       <div className="text-center py-10">
         <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
@@ -143,28 +192,90 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     );
   }
 
+  // Current site index for navigation buttons
+  const currentSiteIndex = sites.findIndex(s => s.id === selectedSiteId);
+  const prevSite = currentSiteIndex > 0 ? sites[currentSiteIndex - 1] : null;
+  const nextSite = currentSiteIndex < sites.length - 1 ? sites[currentSiteIndex + 1] : null;
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <Button variant="outline" onClick={onBack} className="shrink-0">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar para Lista
+          </Button>
+          
+          <Button onClick={downloadExcel} disabled={bills.length === 0 || isLoading} className="shrink-0">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar Excel
+          </Button>
+        </div>
         
-        <Button onClick={downloadExcel} disabled={bills.length === 0}>
-          <Download className="h-4 w-4 mr-2" />
-          Exportar Excel
-        </Button>
+        <div className="bg-muted/50 p-2 rounded-lg">
+          <div className="flex items-center gap-2 justify-between">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => prevSite && handleSiteChange(prevSite.id)}
+              disabled={!prevSite || isLoading}
+              className="h-8 w-8 p-0 rounded-full"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">Instalação anterior</span>
+            </Button>
+            
+            <div className="flex-1">
+              <Select 
+                value={selectedSiteId} 
+                onValueChange={handleSiteChange}
+                disabled={loadingSites || sites.length === 0 || isLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione uma instalação" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sites.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      Instalação {s.siteNumber} - {s.address.substring(0, 30)}
+                      {s.address.length > 30 ? '...' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => nextSite && handleSiteChange(nextSite.id)}
+              disabled={!nextSite || isLoading}
+              className="h-8 w-8 p-0 rounded-full"
+            >
+              <ChevronRight className="h-4 w-4" />
+              <span className="sr-only">Próxima instalação</span>
+            </Button>
+          </div>
+        </div>
       </div>
       
-      <div className="text-center mt-2 mb-6">
+      <div className="text-center mb-6">
         <h2 className="text-2xl font-bold">Histórico de Contas</h2>
         <p className="text-muted-foreground">
-          Instalação {site.siteNumber} - {site.address}
+          Instalação {currentSite.siteNumber} - {currentSite.address}
         </p>
       </div>
       
-      {bills.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-10">
+          <ClipLoader size={40} color="#000000" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-10">
+          <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
+          <p className="text-destructive font-medium">{error}</p>
+        </div>
+      ) : bills.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center">
             <ReceiptIcon className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-2" />
