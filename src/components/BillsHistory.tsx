@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getBillsHistory, getSitesList } from '../services/api';
@@ -30,7 +29,6 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
   const { auth } = useAuth();
   const { toast } = useToast();
 
-  // Fetch bills for the selected site
   useEffect(() => {
     const fetchBills = async () => {
       if (!auth.accessToken || !auth.protocol || !auth.protocolId || !auth.pId) {
@@ -65,7 +63,6 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     fetchBills();
   }, [selectedSiteId, auth, toast]);
 
-  // Fetch all sites for site selector
   useEffect(() => {
     const fetchSites = async () => {
       if (!auth.accessToken || !auth.protocol || !auth.protocolId || !auth.pId) {
@@ -80,7 +77,6 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
           auth.protocolId,
           auth.pId
         );
-        // Only include active sites
         const activeSites = sitesData.filter(site => site.status === 'Active');
         setSites(activeSites);
       } catch (error) {
@@ -109,7 +105,6 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     }
   };
 
-  // Get current site info
   const currentSite = sites.find(s => s.id === selectedSiteId) || site;
 
   if (isLoading && sites.length === 0) {
@@ -130,7 +125,6 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
           </Button>
           
           <div className="flex gap-2">
-            {/* View toggle buttons */}
             <div className="bg-muted rounded-md p-1 flex">
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
@@ -152,14 +146,16 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
               </Button>
             </div>
             
-            <Button 
-              onClick={downloadExcel} 
-              disabled={bills.length === 0 || isLoading} 
-              className="shrink-0"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar Excel
-            </Button>
+            {viewMode === 'table' && (
+              <Button 
+                onClick={downloadExcel} 
+                disabled={bills.length === 0 || isLoading} 
+                className="shrink-0"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar Excel
+              </Button>
+            )}
           </div>
         </div>
         

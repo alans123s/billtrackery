@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Bill } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface BillCardProps {
   bill: Bill;
@@ -37,28 +39,22 @@ export const getStatusColor = (status: string) => {
 };
 
 const BillCard: React.FC<BillCardProps> = ({ bill }) => {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <Card key={bill.billIdentifier} className="overflow-hidden">
+    <Card 
+      key={bill.billIdentifier} 
+      className="overflow-hidden cursor-pointer transition-all hover:shadow-md"
+      onClick={() => setExpanded(!expanded)}
+    >
       <CardHeader className="pb-2">
-        <div className="flex justify-between">
-          <div>
-            <CardTitle className="text-lg">
-              Referência: {bill.referenceMonth}
-            </CardTitle>
-            <CardDescription>
-              Vencimento: {format(parseISO(bill.dueDate), 'dd/MM/yyyy')}
-              {new Date() < parseISO(bill.dueDate) && (
-                <span className="ml-2 text-xs opacity-70">
-                  (em {formatDistanceToNow(parseISO(bill.dueDate), { locale: ptBR })})
-                </span>
-              )}
-            </CardDescription>
-          </div>
-          <div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bill.status)}`}>
-              {getStatusLabel(bill.status)}
-            </span>
-          </div>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg">
+            {bill.referenceMonth}
+          </CardTitle>
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bill.status)}`}>
+            {getStatusLabel(bill.status)}
+          </span>
         </div>
       </CardHeader>
       <CardContent className="pb-4">
@@ -71,13 +67,50 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
             <p className="text-sm text-muted-foreground">Consumo:</p>
             <p className="font-semibold">{bill.consumption} kWh</p>
           </div>
+          <div className="col-span-2 flex justify-center items-center mt-2">
+            {expanded ? (
+              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            )}
+          </div>
         </div>
         
-        <Separator className="my-3" />
-        
-        <p className="text-xs text-muted-foreground">
-          Contrato: {bill.site.contract}
-        </p>
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Separator className="my-3" />
+              
+              <div className="space-y-2 pt-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Vencimento:</p>
+                  <p className="font-medium">{format(parseISO(bill.dueDate), 'dd/MM/yyyy')}
+                    {new Date() < parseISO(bill.dueDate) && (
+                      <span className="ml-2 text-xs opacity-70">
+                        (em {formatDistanceToNow(parseISO(bill.dueDate), { locale: ptBR })})
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Contrato:</p>
+                  <p className="font-medium">{bill.site.contract}</p>
+                </div>
+                {bill.site && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Instalação:</p>
+                    <p className="font-medium">{bill.site.siteNumber}</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
     </Card>
   );
