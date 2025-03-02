@@ -50,6 +50,8 @@ export interface Bill {
   site: {
     id: string;
     contract: string;
+    // siteNumber might not be available in all API responses
+    siteNumber?: string;
   };
   dueDate: string;
   consumption: number;

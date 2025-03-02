@@ -101,7 +101,8 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
                   <p className="text-sm text-muted-foreground">Contrato:</p>
                   <p className="font-medium">{bill.site.contract}</p>
                 </div>
-                {bill.site && (
+                {/* We only display site number info if it's available in the bill.site object */}
+                {bill.site && bill.site.siteNumber && (
                   <div>
                     <p className="text-sm text-muted-foreground">Instalação:</p>
                     <p className="font-medium">{bill.site.siteNumber}</p>
