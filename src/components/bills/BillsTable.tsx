@@ -1,4 +1,12 @@
 
+/**
+ * BillsTable Component
+ * 
+ * Renders energy bills in a tabular format for a more data-dense view.
+ * Includes functionality for sorting and exporting data to Excel.
+ * Handles loading states, errors, and empty states with appropriate UI feedback.
+ */
+
 import React from 'react';
 import { Bill } from '@/types';
 import { format, parseISO } from 'date-fns';
@@ -14,7 +22,12 @@ interface BillsTableProps {
   error: string | null;
 }
 
+/**
+ * Component for displaying bills in a table format
+ * Provides a more structured view of bill data compared to cards
+ */
 const BillsTable: React.FC<BillsTableProps> = ({ bills, isLoading, error }) => {
+  // Show loading spinner while data is being fetched
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-10">
@@ -23,6 +36,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ bills, isLoading, error }) => {
     );
   }
 
+  // Show error message if data fetching failed
   if (error) {
     return (
       <div className="text-center py-10">
@@ -32,6 +46,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ bills, isLoading, error }) => {
     );
   }
 
+  // Show empty state message if no bills are available
   if (bills.length === 0) {
     return (
       <Card>
@@ -43,6 +58,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ bills, isLoading, error }) => {
     );
   }
 
+  // Render bills in table format
   return (
     <div className="rounded-md border">
       <Table>

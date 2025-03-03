@@ -1,11 +1,23 @@
 
+/**
+ * API Service
+ * 
+ * Provides functions for interacting with the backend API.
+ * Handles authentication, error handling, and data transformation.
+ * Contains methods for login, getting sites list, and fetching bills history.
+ */
+
 import axios, { AxiosError } from 'axios';
 import { LoginResponse, Site, Bill } from '@/types';
 
+// API configuration constants
 const API_URL = "https://www.atendimento.cemig.com.br/graphql";
 const API_KEY = "fcad2ef3-49b7-4ac8-bcdb-d78c0fa6e0b6";
 
-// Create axios instance with default configuration
+/**
+ * Create axios instance with default configuration
+ * Sets up base URL and common headers for all requests
+ */
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -15,7 +27,11 @@ const api = axios.create({
   }
 });
 
-// Helper function to handle API errors
+/**
+ * Helper function to handle API errors
+ * Provides specific error messages based on status codes
+ * @param error - The error received from an API call
+ */
 const handleApiError = (error: unknown): never => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
@@ -41,7 +57,9 @@ const handleApiError = (error: unknown): never => {
   throw new Error('Ocorreu um erro inesperado. Tente novamente');
 };
 
-// Type for authentication headers
+/**
+ * Type for authentication headers used in API requests
+ */
 interface AuthHeaders {
   headers: {
     'authorization': string;
@@ -53,7 +71,14 @@ interface AuthHeaders {
   }
 }
 
-// Create authentication headers helper
+/**
+ * Create authentication headers for authenticated API requests
+ * @param authToken - JWT access token
+ * @param protocol - Protocol string identifier
+ * @param protocolId - Protocol ID string
+ * @param pId - Partner ID string
+ * @returns Headers object with authentication data
+ */
 const createAuthHeaders = (authToken: string, protocol: string, protocolId: string, pId: string): AuthHeaders => {
   return {
     headers: {
@@ -67,7 +92,12 @@ const createAuthHeaders = (authToken: string, protocol: string, protocolId: stri
   };
 };
 
-// Login function
+/**
+ * Login function to authenticate user
+ * @param document - CPF/CNPJ document number
+ * @param password - User password
+ * @returns LoginResponse with tokens and user data
+ */
 export const login = async (document: string, password: string): Promise<LoginResponse> => {
   try {
     const response = await api.post('', {
@@ -123,7 +153,14 @@ export const login = async (document: string, password: string): Promise<LoginRe
   }
 };
 
-// Get sites list
+/**
+ * Get list of sites/installations for the authenticated user
+ * @param authToken - JWT access token
+ * @param protocol - Protocol string identifier
+ * @param protocolId - Protocol ID string
+ * @param pId - Partner ID string
+ * @returns Array of Site objects
+ */
 export const getSitesList = async (authToken: string, protocol: string, protocolId: string, pId: string): Promise<Site[]> => {
   try {
     const authHeaders = createAuthHeaders(authToken, protocol, protocolId, pId);
@@ -159,7 +196,15 @@ export const getSitesList = async (authToken: string, protocol: string, protocol
   }
 };
 
-// Get bills history
+/**
+ * Get bills history for a specific site/installation
+ * @param authToken - JWT access token
+ * @param protocol - Protocol string identifier
+ * @param protocolId - Protocol ID string
+ * @param pId - Partner ID string
+ * @param siteId - ID of the site to retrieve bills for
+ * @returns Array of Bill objects
+ */
 export const getBillsHistory = async (authToken: string, protocol: string, protocolId: string, pId: string, siteId: string): Promise<Bill[]> => {
   try {
     const authHeaders = createAuthHeaders(authToken, protocol, protocolId, pId);

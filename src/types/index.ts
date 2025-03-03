@@ -1,4 +1,15 @@
 
+/**
+ * Type Definitions
+ * 
+ * This file contains TypeScript interfaces for the application's data structures.
+ * These interfaces define the shape of data returned from the API and used throughout the app.
+ */
+
+/**
+ * Response structure from the login API endpoint
+ * Contains user authentication tokens, protocol information, and user details
+ */
 export interface LoginResponse {
   token: {
     accessToken: string;
@@ -31,6 +42,10 @@ export interface LoginResponse {
   };
 }
 
+/**
+ * Site/Installation information
+ * Contains details about a physical energy installation location
+ */
 export interface Site {
   id: string;
   clientNumber: string;
@@ -42,6 +57,10 @@ export interface Site {
   contractAccount: string;
 }
 
+/**
+ * Energy bill information
+ * Contains details about a specific energy bill including amount, dates, and consumption
+ */
 export interface Bill {
   billIdentifier: string;
   status: string;
@@ -57,6 +76,10 @@ export interface Bill {
   consumption: number;
 }
 
+/**
+ * Authentication state stored in context
+ * Tracks user login status and authentication details
+ */
 export interface AuthState {
   isAuthenticated: boolean;
   accessToken: string | null;

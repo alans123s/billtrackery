@@ -1,4 +1,12 @@
 
+/**
+ * BillCard Component
+ * 
+ * Displays a single energy bill in a card format with expandable details.
+ * The card initially shows summary information (month, value, consumption, status)
+ * and expands to show additional details when clicked.
+ */
+
 import React, { useState } from 'react';
 import { Bill } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +20,11 @@ interface BillCardProps {
   bill: Bill;
 }
 
+/**
+ * Converts API status codes to human-readable Portuguese labels
+ * @param status - The status code from the API
+ * @returns A user-friendly label in Portuguese
+ */
 export const getStatusLabel = (status: string) => {
   switch (status) {
     case 'Paid':
@@ -25,6 +38,11 @@ export const getStatusLabel = (status: string) => {
   }
 };
 
+/**
+ * Returns the appropriate CSS color class based on bill status
+ * @param status - The status code from the API
+ * @returns CSS class string for styling the status badge
+ */
 export const getStatusColor = (status: string) => {
   switch (status) {
     case 'Paid':
@@ -38,7 +56,12 @@ export const getStatusColor = (status: string) => {
   }
 };
 
+/**
+ * BillCard component that displays bill information in an interactive card
+ * Supports expanding/collapsing to show additional details
+ */
 const BillCard: React.FC<BillCardProps> = ({ bill }) => {
+  // State to track if the card is expanded to show additional details
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -76,6 +99,7 @@ const BillCard: React.FC<BillCardProps> = ({ bill }) => {
           </div>
         </div>
         
+        {/* Animated expansion panel for additional details */}
         <AnimatePresence>
           {expanded && (
             <motion.div

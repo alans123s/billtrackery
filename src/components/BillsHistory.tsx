@@ -1,3 +1,12 @@
+
+/**
+ * BillsHistory Component
+ * 
+ * Displays the history of energy bills for a selected site/installation.
+ * Provides functionality to switch between card and table views.
+ * Includes site selection and Excel export features.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getBillsHistory, getSitesList } from '../services/api';
@@ -17,18 +26,29 @@ interface BillsHistoryProps {
   onBack: () => void;
 }
 
+/**
+ * Component for displaying and interacting with bills history
+ * Provides view switching between cards and table formats
+ */
 const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
+  // State for bills data and loading states
   const [bills, setBills] = useState<Bill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // State for sites data and selection
   const [sites, setSites] = useState<Site[]>([]);
   const [loadingSites, setLoadingSites] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState<string>(site.id);
+  
+  // Toggle between card and table views
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   
+  // Access authentication and toast functionality
   const { auth } = useAuth();
   const { toast } = useToast();
 
+  // Fetch bills when selected site changes
   useEffect(() => {
     const fetchBills = async () => {
       if (!auth.accessToken || !auth.protocol || !auth.protocolId || !auth.pId) {
@@ -63,6 +83,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     fetchBills();
   }, [selectedSiteId, auth, toast]);
 
+  // Fetch available sites on component mount
   useEffect(() => {
     const fetchSites = async () => {
       if (!auth.accessToken || !auth.protocol || !auth.protocolId || !auth.pId) {
@@ -77,6 +98,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
           auth.protocolId,
           auth.pId
         );
+        // Filter only active sites
         const activeSites = sitesData.filter(site => site.status === 'Active');
         setSites(activeSites);
       } catch (error) {
@@ -89,10 +111,12 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     fetchSites();
   }, [auth]);
 
+  // Handle site selection change
   const handleSiteChange = (siteId: string) => {
     setSelectedSiteId(siteId);
   };
 
+  // Export bills data to Excel file
   const downloadExcel = () => {
     const currentSite = sites.find(s => s.id === selectedSiteId) || site;
     const success = exportBillsToExcel(bills, currentSite);
@@ -105,8 +129,10 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
     }
   };
 
+  // Get current site details
   const currentSite = sites.find(s => s.id === selectedSiteId) || site;
 
+  // Show loading state when both bills and sites are loading initially
   if (isLoading && sites.length === 0) {
     return (
       <div className="flex justify-center items-center py-10">
@@ -118,6 +144,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
+        {/* Top navigation and view controls */}
         <div className="flex justify-between items-center flex-wrap gap-2">
           <Button variant="outline" onClick={onBack} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -125,6 +152,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
           </Button>
           
           <div className="flex gap-2">
+            {/* View mode toggle buttons */}
             <div className="bg-muted rounded-md p-1 flex">
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
@@ -146,6 +174,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
               </Button>
             </div>
             
+            {/* Excel export button - only shown in table view */}
             {viewMode === 'table' && (
               <Button 
                 onClick={downloadExcel} 
@@ -159,6 +188,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
           </div>
         </div>
         
+        {/* Site selector dropdown */}
         <SiteSelector 
           sites={sites} 
           selectedSiteId={selectedSiteId} 
@@ -168,6 +198,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
         />
       </div>
       
+      {/* Page title and subtitle */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold">Histórico de Contas</h2>
         <p className="text-muted-foreground">
@@ -175,6 +206,7 @@ const BillsHistory: React.FC<BillsHistoryProps> = ({ site, onBack }) => {
         </p>
       </div>
       
+      {/* Animated view switching between cards and table */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
