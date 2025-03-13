@@ -20,17 +20,6 @@ const LoginForm: React.FC = () => {
   const { login: authLogin } = useAuth();
   const { toast } = useToast();
 
-  const formatDocument = (value: string) => {
-    // Remove all non-numeric characters
-    return value.replace(/\D/g, '');
-  };
-
-  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    const formattedValue = formatDocument(rawValue);
-    setDocument(formattedValue);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -45,7 +34,6 @@ const LoginForm: React.FC = () => {
     
     try {
       setIsLoading(true);
-      // Format document for API if needed (API might expect with or without punctuation)
       const loginResponse = await login(document, password);
       authLogin(loginResponse);
 
@@ -133,7 +121,7 @@ const LoginForm: React.FC = () => {
                 id="document"
                 placeholder="Digite seu CPF ou CNPJ (apenas números)"
                 value={document}
-                onChange={handleDocumentChange}
+                onChange={(e) => setDocument(e.target.value)}
                 onFocus={() => setFocusedField('document')}
                 onBlur={() => setFocusedField(null)}
                 className={`transition-all duration-300 ${focusedField === 'document' ? 'border-astro-green ring-1 ring-astro-green/20' : ''}`}
